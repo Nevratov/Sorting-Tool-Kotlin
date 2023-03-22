@@ -1,0 +1,163 @@
+import java.io.File
+import java.util.*
+
+val scanner = Scanner(System.`in`)
+val numList = arrayListOf<String>()
+val mapCount = mutableMapOf<String, Int>()
+
+fun main(args: Array<String>) {
+    checkNotValidArguments(args)
+    try {
+        if ("-sortingType" in args && args[args.indexOf("-sortingType") + 1] == "byCount") {
+            when (args[args.indexOf("-dataType") + 1]) {
+                "long" -> countSortLong(args)
+                "line" -> countSortLine(args)
+                "word" -> countSortWord(args)
+                else -> countSortLong(args)
+            }
+        } else {
+            when (args[args.indexOf("-dataType") + 1]) {
+                "long" -> naturalSortLongs(args)
+                "line" -> naturalSortLines(args)
+                "word" -> naturalSortWords(args)
+                else -> naturalSortLongs(args)
+            }
+        }
+    } catch (e: ArrayIndexOutOfBoundsException) {
+        if ("-sortingType" in args) println("No sorting type defined!")
+        else if ("-dataType" in args) println("No data type defined!")
+    }
+}
+
+fun isNumericToX(toCheck: String): Boolean {
+    return toCheck.toIntOrNull() != null
+}
+
+fun isStringToX(toCheck: String): Boolean {
+    return toCheck.toIntOrNull() == null
+}
+
+fun countSortLong(args: Array<String>) {
+    if ("-inputFile" in args) {
+        val fileName = args[args.indexOf("-inputFile") + 1]
+        val fileText = File(fileName).readLines()
+        for (i in fileText) numList.addAll(i.split(("""\s+""").toRegex()))
+    } else while (scanner.hasNext()) numList.addAll(scanner.next().split(" "))
+
+    val notValidInt = numList.filter { isStringToX(it) }
+    for (str in notValidInt) println("\"$str\" is not a long. It will be skipped.")
+
+    val intList = numList.filter { isNumericToX(it) }
+
+    for (i in intList) mapCount += i to intList.filter { it == i }.size
+    var toSortMap = mapCount.toList().sortedWith { m1: Pair<String, Int>, m2: Pair<String, Int> -> m1.first.toInt() - m2.first.toInt() }
+    toSortMap = toSortMap.sortedWith { m1: Pair<String, Int>, m2: Pair<String, Int> -> m1.second - m2.second }
+
+    if ("-outputFile" in args) {
+        val outputFileName = args[args.indexOf("-outputFile") + 1]
+        File(outputFileName).appendText("Total numbers: ${intList.size}.\n")
+        for (i in toSortMap) File(outputFileName).appendText("${i.first}: ${i.second} time(s), ${(i.second.toDouble() / intList.size.toDouble() * 100).toInt()}%\n")
+    } else {
+        println("Total numbers: ${intList.size}.")
+        for (i in toSortMap) println("${i.first}: ${i.second} time(s), ${(i.second.toDouble() / intList.size.toDouble() * 100).toInt()}%")
+    }
+}
+
+fun countSortLine(args: Array<String>) {
+    if ("-inputFile" in args) {
+        val fileName = args[args.indexOf("-inputFile") + 1]
+        val fileText = File(fileName).readLines()
+        for (i in fileText) numList.addAll(i.split(("""\s+""").toRegex()))
+    } else while (scanner.hasNext()) numList.add(scanner.nextLine())
+
+    for (i in numList) mapCount += i to numList.filter { it == i }.size
+    var toSortMap = mapCount.toList().sortedBy { it.first }
+    toSortMap = toSortMap.sortedWith { m1: Pair<String, Int>, m2: Pair<String, Int> -> m1.second - m2.second }
+
+    if ("-outputFile" in args) {
+        val outputFileName = args[args.indexOf("-outputFile") + 1]
+        File(outputFileName).appendText("Total lines: ${numList.size}.\n")
+        for (i in toSortMap) File(outputFileName).appendText("${i.first}: ${i.second} time(s), ${(i.second.toDouble() / numList.size.toDouble() * 100).toInt()}%")
+    } else {
+        println("Total lines: ${numList.size}.")
+        for (i in toSortMap) println("${i.first}: ${i.second} time(s), ${(i.second.toDouble() / numList.size.toDouble() * 100).toInt()}%")
+    }
+}
+fun countSortWord(args: Array<String>) {
+    if ("-inputFile" in args) {
+        val fileName = args[args.indexOf("-inputFile") + 1]
+        val fileText = File(fileName).readLines()
+        for (i in fileText) numList.addAll(i.split(("""\s+""").toRegex()))
+    } else while (scanner.hasNext()) numList.addAll(scanner.next().split(" "))
+
+    for (i in numList) mapCount += i to numList.filter { it == i }.size
+    var toSortMap = mapCount.toList().sortedBy { it.first }
+    toSortMap = toSortMap.toList().sortedWith { m1: Pair<String, Int>, m2: Pair<String, Int> -> m1.second - m2.second }
+
+
+    if ("-outputFile" in args) {
+        val outputFileName = args[args.indexOf("-outputFile") + 1]
+        File(outputFileName).appendText("Total words: ${numList.size}.\n")
+        for (i in toSortMap) File(outputFileName).appendText("${i.first}: ${i.second} time(s), ${(i.second.toDouble() / numList.size.toDouble() * 100).toInt()}%")
+    } else {
+        println("Total words: ${numList.size}.")
+        for (i in toSortMap) println("${i.first}: ${i.second} time(s), ${(i.second.toDouble() / numList.size.toDouble() * 100).toInt()}%")
+    }
+}
+
+fun naturalSortLongs(args: Array<String>) {
+    if ("-inputFile" in args) {
+        val fileName = args[args.indexOf("-inputFile") + 1]
+        val fileText = File(fileName).readLines()
+        for (i in fileText) numList.addAll(i.split(("""\s+""").toRegex()))
+    } else while (scanner.hasNext()) numList.addAll(scanner.next().split(" "))
+
+    val notValidInt = numList.filter { isStringToX(it) }
+    for (str in notValidInt) println("\"$str\" is not a long. It will be skipped.")
+
+    val intList = numList.filter { isNumericToX(it) }
+    val sortedListInt = intList.map { v -> v.toInt() }.sorted()
+
+    if ("-outputFile" in args) {
+        val outputFileName = args[args.indexOf("-outputFile") + 1]
+        File(outputFileName).appendText("Total numbers: ${sortedListInt.size}.\nSorted data: ${sortedListInt.joinToString(" ")}\n")
+    } else println("Total numbers: ${sortedListInt.size}.\nSorted data: ${sortedListInt.joinToString(" ")}")
+}
+
+fun naturalSortWords(args: Array<String>) {
+    if ("-inputFile" in args) {
+        val fileName = args[args.indexOf("-inputFile") + 1]
+        val fileText = File(fileName).readLines()
+        for (i in fileText) numList.addAll(i.split(("""\s+""").toRegex()))
+    } else while (scanner.hasNext()) numList.addAll(scanner.next().split(" "))
+    val sortedListInt = numList.sorted()
+
+    if ("-outputFile" in args) {
+        val outputFileName = args[args.indexOf("-outputFile") + 1]
+        File(outputFileName).appendText("Total words: ${numList.size}.\nSorted data: ${sortedListInt.joinToString(" ")}\n")
+    } else println("Total words: ${numList.size}.\nSorted data: ${sortedListInt.joinToString(" ")}")
+}
+
+fun naturalSortLines(args: Array<String>) {
+    if ("-inputFile" in args) {
+        val fileName = args[args.indexOf("-inputFile") + 1]
+        val fileText = File(fileName).readLines()
+        for (i in fileText) numList.addAll(i.split(("""\s+""").toRegex()))
+    } else while (scanner.hasNext()) numList.add(scanner.nextLine())
+    val sortedListInt = numList.sorted()
+
+    if ("-outputFile" in args) {
+        val outputFileName = args[args.indexOf("-outputFile") + 1]
+        File(outputFileName).appendText("Total lines: ${numList.size}.\nSorted data:")
+        for (line in sortedListInt) File(outputFileName).appendText(line)
+    } else {
+        println("Total lines: ${numList.size}.\nSorted data:")
+        for (line in sortedListInt) println(line)
+    }
+}
+
+fun checkNotValidArguments(args: Array<String>) {
+    val validArgs = arrayOf("java", "SortingTool", "-sortingType", "-dataType", "natural", "byCount", "long", "line",
+        "word", "-inputFile", "-outputFile", args[args.indexOf("-inputFile") + 1], args[args.indexOf("-outputFile") + 1])
+    for (string in args) if (string !in validArgs) println("\"$string\" is not a valid parameter. It will be skipped.")
+}
